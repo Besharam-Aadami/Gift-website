@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Promises karrrr!! 💖✨</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #fff8f0;
+        text-align: center;
+        padding: 20px;
+        color: #333;
+    }
+    h1 {
+        font-size: 2rem;
+        color: #ff69b4;
+    }
+    ul {
+        text-align: left;
+        max-width: 500px;
+        margin: auto;
+        list-style: none;
+        padding: 0;
+    }
+    li {
+        background: #ffe6f2;
+        margin: 8px 0;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 1rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    input[type="checkbox"] {
+        transform: scale(1.2);
+    }
+    .special-msg {
+        margin-top: 20px;
+        font-size: 1.2rem;
+        color: #ff4500;
+        font-weight: bold;
+        display: none;
+    }
+    .lock-message {
+        margin-top: 20px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #2e8b57;
+    }
+    .no-copy {
+        background: #fff3cd;
+        padding: 10px;
+        border-radius: 5px;
+        display: inline-block;
+        font-weight: bold;
+    }
+    input[type="text"] {
+        padding: 10px;
+        width: 90%;
+        max-width: 400px;
+        margin-top: 10px;
+    }
+    button {
+        padding: 10px 20px;
+        margin-top: 15px;
+        background-color: #ff69b4;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    button:disabled {
+        background-color: grey;
+        cursor: not-allowed;
+    }
+    .sparkles {
+        font-size: 1.2rem;
+    }
+
+    /* NEXT button style */
+    #next-btn {
+        background-color: #32cd32;
+        color: white;
+        font-weight: bold;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 18px;
+        box-shadow: 0 6px 18px rgba(50,205,50,0.2);
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+    #next-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(50,205,50,0.28); }
+
+    /* celebration sparkles animation container (inside locked view) */
+    .celebrate {
+        position: relative;
+        height: 80px;
+        pointer-events: none;
+        overflow: visible;
+        margin-top: 8px;
+    }
+    .celebrate span {
+        position: absolute;
+        bottom: 0;
+        font-size: 20px;
+        opacity: 0;
+        transform-origin: center;
+        animation: floatUp 1600ms linear infinite;
+    }
+    /* staggered positions/delays */
+    .celebrate span:nth-child(1){ left: 10%; animation-delay: 0ms; }
+    .celebrate span:nth-child(2){ left: 30%; animation-delay: 150ms; transform: scale(1.1); }
+    .celebrate span:nth-child(3){ left: 50%; animation-delay: 300ms; }
+    .celebrate span:nth-child(4){ left: 70%; animation-delay: 450ms; transform: scale(1.2); }
+    .celebrate span:nth-child(5){ left: 85%; animation-delay: 600ms; }
+    .celebrate span:nth-child(6){ left: 20%; animation-delay: 750ms; }
+    .celebrate span:nth-child(7){ left: 40%; animation-delay: 900ms; }
+    .celebrate span:nth-child(8){ left: 60%; animation-delay: 1050ms; }
+
+    @keyframes floatUp {
+        0% { transform: translateY(0) scale(1); opacity: 0; }
+        10% { opacity: 1; }
+        80% { transform: translateY(-120px) scale(1.15); opacity: 0.9; }
+        100% { transform: translateY(-160px) scale(0.9); opacity: 0; }
+    }
+
+    /* small responsive tweak */
+    @media (max-width:480px) {
+        .celebrate span { font-size: 18px; }
+        #next-btn { padding: 10px 18px; }
+        h1 { font-size: 1.6rem; }
+    }
+</style>
+</head>
+<body>
+
+<h1>✨ Promises to Myself and to You 💕✨</h1>
+<p class="sparkles">💍 These are promises you must keep forever ✨</p>
+
+<ul id="promise-list">
+    <li><label><input type="checkbox"> 💖 YOU PROMISE TO NEVER DOUBT YOURSELF IN ANY CASE</label></li>
+    <li><label><input type="checkbox"> 🌸 YOU PROMISE TO ALWAYS LOVE YOURSELF, BE YOUR FIRST PRIORITY (AND SHARE FOOD WITH ME 😗)</label></li>
+    <li><label><input type="checkbox"> 😤 YOU PROMISE NEVER TO DISAGREE WITH MY COMPLIMENTS (MY TASTE IS ELITE! IN U OFC MY DARLING 🥰)</label></li>
+    <li><label><input type="checkbox"> 🤪 YOU PROMISE TO KEEP UP WITH MY NONSENSE & RANDOM BULLSHIT</label></li>
+    <li><label><input type="checkbox"> 📜 YOU PROMISE TO MAKE A SHARED LIST OF ALL THE THINGS YOU LIKE OR WANT AND THEN HAVE IT SO THAT WE BOTH CAN VIEW IT WHENEVER I WANT!!JASE ISNTA PE SAVE KARTI HAI KABHI KABHI VASE KAHIS SAHI JAGA PE BASS😤😤</label></li>
+    <li><label><input type="checkbox"> 📢 YOU PROMISE NOT TO GO BACK ON ANY OF YOUR WORDS</label></li>
+    <li><label><input type="checkbox"> ❤️ YOU PROMISE NOT TO STOP LOVING ME 👉👈 (MAJAK KARTA HU YAR, ME MOSTLY MERE BAAT SERIOUS MAT LENA PLZ. SAMAJH AA GAYA HAI MUJHE AB KUCH MAJAK ACHE NAHI LAGTE TUNE, TOH AB SE NAHI KAHUNGA VAISE KUCH. SORRY 😞)</label></li>
+</ul>
+
+<p class="special-msg" id="special-msg">
+    ✨ NO MATTER WHAT, YOU WILL NOW AGREE WITH THESE FOREVER! ✨
+</p>
+
+<div id="write-section" style="display:none;">
+    <p>🖊 WRITE OR PASTE THIS EXACTLY AS SHOWN BELOW:</p>
+    <div class="no-copy" id="locked-text">
+        I, HARSHITA MITTAL, HEREBY DECLARE THAT I HAVE READ AND, OF MY OWN FREE WILL, TICKED ALL THE CHECKBOXES, AND I PROMISE TO FOLLOW THEM NO MATTER WHAT!!!
+    </div>
+    <input type="text" id="user-input" placeholder="TYPE OR PASTE THE SENTENCE HERE..." autocomplete="off">
+    <br>
+    <button id="submit-btn" disabled>✨ SUBMIT ✨</button>
+</div>
+
+<div id="locked-view" style="display:none;">
+    <h2>🔒 LOCKED PROMISES ✨<br>This is a peice of paper ill use often🤭😁🤭😁🤭😁hehehe</h2>
+    <div id="locked-promises"></div>
+    <p id="final-line" style="font-weight:bold; margin-top:10px;"></p>
+
+    <!-- celebration sparkles/emoji -->
+    <div class="celebrate" aria-hidden="true">
+        <span>✨</span><span>💖</span><span>✨</span><span>🎉</span>
+        <span>💖</span><span>✨</span><span>🎊</span><span>✨</span>
+    </div>
+
+    <!-- NEXT PAGE button (goes to page7_game.html by default) -->
+    <button id="next-btn">NEXT PAGE ➡️</button>
+</div>
+
+<script>
+    const checkboxes = document.querySelectorAll('#promise-list input[type="checkbox"]');
+    const specialMsg = document.getElementById('special-msg');
+    const writeSection = document.getElementById('write-section');
+    const lockedText = document.getElementById('locked-text').innerText.trim();
+    const userInput = document.getElementById('user-input');
+    const submitBtn = document.getElementById('submit-btn');
+    const lockedView = document.getElementById('locked-view');
+    const lockedPromises = document.getElementById('locked-promises');
+    const finalLine = document.getElementById('final-line');
+    const nextBtn = document.getElementById('next-btn');
+
+    // Show typing section after all boxes ticked
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            if ([...checkboxes].every(c => c.checked)) {
+                specialMsg.style.display = 'block';
+                writeSection.style.display = 'block';
+            }
+        });
+    });
+
+    // Enable submit only if exactly matches (allow typing or pasting)
+    userInput.addEventListener('input', () => {
+        submitBtn.disabled = userInput.value.trim() !== lockedText;
+    });
+
+    // On submit, lock the promises and show celebration + Next button
+    submitBtn.addEventListener('click', () => {
+        const checkedPromises = [...checkboxes]
+            .map(cb => `<p>✅ ${cb.parentElement.innerText}</p>`)
+            .join('');
+        lockedPromises.innerHTML = checkedPromises;
+        finalLine.innerText = userInput.value.trim();
+        document.getElementById('promise-list').style.display = 'none';
+        writeSection.style.display = 'none';
+        specialMsg.style.display = 'none';
+        lockedView.style.display = 'block';
+        // start small visual emphasis on next button (optional)
+        nextBtn.animate(
+          [{ transform: 'scale(1)' }, { transform: 'scale(1.06)' }, { transform: 'scale(1)' }],
+          { duration: 900, iterations: 3 }
+        );
+    });
+
+    // Next button — change 'page7.html' to whatever target filename you want
+    nextBtn.addEventListener('click', () => {
+        window.location.href = 'page7_game.html';
+    });
+</script>
+
+</body>
+</html>

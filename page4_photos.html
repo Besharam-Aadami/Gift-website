@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photos Hamari!!</title>
+<style>
+    body {
+        background-color: #fce4ec;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh; /* Fill screen height */
+        overflow: hidden; /* No scroll */
+    }
+    h1 {
+        color: #d81b60;
+        margin: 10px 0;
+        flex-shrink: 0;
+        text-align: center; /* Center the title */
+    }
+    #photo-container {
+        position: relative;
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+    #photo {
+        max-height: 100%;
+        max-width: 100%;
+        border-radius: 15px;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+        object-fit: contain;
+    }
+    .note {
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 64, 129, 0.85);
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 16px;
+        color: white;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+        max-width: 80%;
+        text-align: center;
+        line-height: 1.4;
+    }
+    .buttons {
+        margin: 10px 0;
+        flex-shrink: 0;
+        text-align: center; /* Center buttons horizontally */
+    }
+    button {
+        background-color: #ff80ab;
+        border: none;
+        padding: 10px 20px;
+        margin: 5px;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        color: white;
+    }
+    button:hover {
+        background-color: #f06292;
+    }
+    #moreButton {
+        background-color: #ff4081;
+    }
+</style>
+</head>
+<body>
+
+<h1>Memory Photos</h1>
+<div id="photo-container">
+    <img id="photo" src="" alt="Memory Photo">
+    <div id="notes-container"></div>
+</div>
+<audio id="song" autoplay></audio>
+
+<div class="buttons">
+    <button onclick="prevPhoto()">Previous</button>
+    <button onclick="nextPhoto()">Next</button>
+    <br>
+    <button id="moreButton" style="display:none;" onclick="location.href='page5_slideshow.html'">
+        I still have more to show 😘🤭
+    </button>
+</div>
+
+<script>
+const photos = [
+    'photos/photo1.jpg',
+    'photos/photo2.jpg',
+    'photos/photo3.jpg',
+    'photos/photo4.jpg'
+];
+
+const songs = [
+    'songs/song1.mp3',
+    'songs/song2.mp3',
+    'songs/song3.mp3',
+    'songs/song4.mp3'
+];
+
+const notes = [
+    ["😊 ye photo pyari lagti mujhe itne sahi se ekdam khul ke has rahi hai aur tere saree tooo uffff 💖"],
+    ["😆 My heart went pounding so much poker face bas aa gaya force kiya gaya tha mujhe kada hone ke lea"],
+    ["😭 mujhe itne ajeeb tarike se haat rakna pada tha fat rahi the bass"],
+    ["🤭 hamari best photo no questions (abhi tak that is) asked... aur hame khud he chipa gaye the ek dusre se"]
+];
+
+let currentIndex = 0;
+const photoElement = document.getElementById('photo');
+const songElement = document.getElementById('song');
+const notesContainer = document.getElementById('notes-container');
+const moreButton = document.getElementById('moreButton');
+
+function showPhoto(index) {
+    if (index < 0) index = photos.length - 1;
+    if (index >= photos.length) index = 0;
+    currentIndex = index;
+
+    photoElement.src = photos[currentIndex];
+    songElement.src = songs[currentIndex];
+    songElement.play().catch(() => console.log("Autoplay blocked, waiting for user interaction"));
+
+    // Show note
+    notesContainer.innerHTML = '';
+    const noteDiv = document.createElement('div');
+    noteDiv.classList.add('note');
+    noteDiv.innerText = notes[currentIndex][0];
+    notesContainer.appendChild(noteDiv);
+
+    moreButton.style.display = (currentIndex === photos.length - 1) ? 'inline-block' : 'none';
+}
+
+function prevPhoto() {
+    showPhoto(currentIndex - 1);
+}
+
+function nextPhoto() {
+    showPhoto(currentIndex + 1);
+}
+
+showPhoto(currentIndex);
+</script>
+
+</body>
+</html>

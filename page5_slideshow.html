@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mera Pyar</title>
+<style>
+    body {
+        margin: 0;
+        background: black;
+        color: white;
+        font-family: sans-serif;
+        overflow: hidden;
+    }
+    #slideshow {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        object-fit: contain;
+        transition: opacity 0.5s ease;
+    }
+    #caption {
+        position: fixed;
+        bottom: 20px;
+        right: 120px; /* space for button */
+        font-size: 1.5rem;
+        text-shadow: 2px 2px 5px black;
+    }
+    #playPauseBtn {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        font-size: 2rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+        outline: none;
+        color: white;
+        transition: transform 0.2s ease;
+    }
+    #playPauseBtn:hover {
+        transform: scale(1.2);
+    }
+    /* Dim effect when paused */
+    .paused {
+        opacity: 0.6;
+        filter: grayscale(30%);
+    }
+    #nextPageBtn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #ff4d6d;
+        border: none;
+        color: white;
+        padding: 10px 16px;
+        font-size: 1rem;
+        cursor: pointer;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        transition: background 0.3s ease;
+    }
+    #nextPageBtn:hover {
+        background: #ff1f4a;
+    }
+</style>
+</head>
+<body>
+
+<img id="slideshow" src="" alt="Slideshow">
+<div id="caption"></div>
+<button id="playPauseBtn">🍑</button>
+<audio id="bgMusic" src="songs/p2_song.mp3" loop></audio>
+<button id="nextPageBtn">Next ➡</button>
+
+<script>
+const photoFolder = "photos/";
+const captions = {
+    "p2_photo1.jpg": "Ghumi ghumi",
+    "p2_photo2.jpg": "hayeee piduu",
+    "p2_photo3.jpg": "🥵🥵",
+    "p2_photo4.jpg": "chotu princes mere 🥰",
+    "p2_photo5.jpg": "ye toh profile pic bhi rahi hai",
+    "p2_photo6.jpg": "atheletic toh bachpan se hai",
+    "p2_photo7.jpg": "pretty pretty",
+    "p2_photo8.jpg": "choti apurva lagti hai mere hisab se toh",
+    "p2_photo9.jpg": "hehe school ke bhi toh hone chiye",
+    "p2_photo10.jpg": "bass redddddd 😭😭",
+    "p2_photo11.jpg": "cute sa bhaluu mera 🤭🤭",
+    "p2_photo12.jpg": "fir lal 😭",
+    "p2_photo13.jpg": "uffff!!!",
+    "p2_photo14.jpg": "awwww bby😘😘 ",
+    "p2_photo15.jpg": "my pretty lady",
+    "p2_photo16.jpg": "kitne pyari lagti hai tu haste hueee🥰",
+    "p2_photo17.jpg": "hehe hai mere pe ye photo",
+    "p2_photo18.jpg": "hayeee ye pose tere😝😝",
+    "p2_photo19.jpg": "haste hue awwww!!!",
+    "p2_photo20.jpg": "👍👍👍",
+    "p2_photo21.jpg": "not lieing mommy lag rahi hai🥵",
+    "p2_photo22.jpg": "hayeee smileee pighal na jao mee",
+    "p2_photo23.jpg": "heels ka showoff🤣🤣",
+    "p2_photo24.jpg": "pose!!!",
+    "p2_photo25.jpg": "sexyyyyy!!",
+    "p2_photo26.jpg": "khekhekeh",
+    "p2_photo27.jpg": "hayeee smile tohh jan leva hai bhai BREATH TAKING!!",
+    "p2_photo28.jpg": "finaly bluee aur lipss😖😖 itne distracting",
+    "p2_photo29.jpg": "kapdo ka acha malik mil gaya🤭 ooh sorry malkin",
+    "p2_photo30.jpg": "AESTHRTICness jalak rahi hai",
+    "p2_photo31.jpg": "sleeppaglu but my sleeppaglu🤭🤭",
+    "p2_photo32.jpg": "PARTYYYYYY (mujhe bhi chiye samjhi)",
+    "p2_photo33.jpg": "ohhh julfee",
+    "p2_photo34.jpg": "hayeee itne prayi smileee CUTEEEEEEEEEEEEEEEEEEEEEE!!",
+    "p2_photo35.jpg": "mere labubu😏🥰🥰",
+    "p2_photo36.jpg": "harshiee saying:haiiiiii after heaing something weird",
+    "p2_photo37.jpg": "kya expression hai 😂😂😂",
+    "p2_photo38.jpg": "soti sundari (crop ni kari shit)",
+    "p2_photo39.jpg": "pillow toh ase hug kar rakha hai(mujhe bhi kar lea kar🙁🙁😔😔)",
+    "p2_photo40.jpg": "diskiyao diskiyao 🔫🔫 don hu don",
+    "p2_photo41.jpg": "gol gol harshiee 😝😝",
+    "p2_photo42.jpg": "ye photo bahut pyari lagti mujhe tere itne kush hai tu isme",
+    "p2_photo43.jpg": "NACHOOOO 💃🏻💃🏻",
+    "p2_photo44.jpg": "hayee sach me harshiee tere smile toh bass uffffff",
+    "p2_photo45.jpg": "happy happyy",
+    "p2_photo46.jpg": "buzzzzyyyy maam bijee",
+    "p2_photo47.jpg": "piduuuuuu ",	
+    "p2_photo48.jpg": "chadar shawl ke tara rak rakhi hai 🤣🤣",
+    "p2_photo49.jpg": "ohh the rider🤭🤭(scooty wala inside joke yad hai)",
+    "p2_photo50.jpg": "besaan taning hatiye ja rahi hai uff glow ke lea 💅🏻💅🏻 hame dekho😝",
+    "p2_photo51.jpg": "no no alive hi chiye ye cute se mahila mujhe vo bhi hamesa ke lea",
+    "p2_photo52.jpg": "no comments 😶😶 (gali toh padni paki hai)",
+    "p2_photo53.jpg": "Harshiee saying:fuk u Ansh🖕🏻(ofc british accent me ofc we oth love it)",
+    "p2_photo54.jpg": "hayee gol gol ekdam gal 🤤 sceen na kha jao me(kab milegi a tere gal mujhe)",
+    "p2_photo55.jpg": "takluuu🤭🤭",
+    "p2_photo56.jpg": "ye to trophy hai mere heheeh🤭🤭🤭🤭🤭🤭",
+    "p2_photo57.jpg": "Thikkkkkkkccccccccc🤤🤤🤤🤤🤤🤤",
+    "p2_photo58.jpg": "chalo me chala ase ase photo dekiye hai Inspector Harshiee pakad ke bahut pitee kar dengi mere🤭🤭(especialy last ke 5)"
+};
+
+let images = Object.keys(captions);
+let currentIndex = 0;
+let slideshow = document.getElementById("slideshow");
+let captionBox = document.getElementById("caption");
+let bgMusic = document.getElementById("bgMusic");
+let playPauseBtn = document.getElementById("playPauseBtn");
+let nextPageBtn = document.getElementById("nextPageBtn");
+
+let slideshowInterval;
+let isPlaying = false;
+
+function showImage(index) {
+    slideshow.style.opacity = 0;
+    setTimeout(() => {
+        slideshow.src = photoFolder + images[index];
+        captionBox.textContent = captions[images[index]];
+        slideshow.style.opacity = 1;
+    }, 500);
+}
+
+function nextImage() {
+    currentIndex = (currentIndex + 1) % images.length;
+    showImage(currentIndex);
+}
+
+function startSlideshow() {
+    slideshowInterval = setInterval(nextImage, 6000);
+}
+
+function stopSlideshow() {
+    clearInterval(slideshowInterval);
+}
+
+// Initialize with first image
+showImage(currentIndex);
+
+playPauseBtn.addEventListener("click", () => {
+    if (isPlaying) {
+        // Pause both
+        bgMusic.pause();
+        stopSlideshow();
+        slideshow.classList.add("paused");
+    } else {
+        // Play both
+        bgMusic.play();
+        startSlideshow();
+        slideshow.classList.remove("paused");
+    }
+    isPlaying = !isPlaying;
+});
+
+// Go to next page
+nextPageBtn.addEventListener("click", () => {
+    window.location.href = "page6_promises.html"; // change to your actual next page file
+});
+</script>
+
+</body>
+</html>

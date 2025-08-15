@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Forever Game — Snow</title>
+<style>
+  :root{
+    --pink:#ff69b4;
+    --deep:#d81b60;
+    --soft:#fff8f0;
+    --bubble:#ffe6f2;       /* 🔥 no yellow: soft pink bubbles */
+    --ok:#2ecc71;
+    --warn:#ff9800;
+    --dark:#333;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color:var(--dark);
+    background:var(--soft);
+  }
+  header{
+    padding:18px 16px;
+    text-align:center;
+    color:#fff;
+    background:linear-gradient(135deg,var(--deep),var(--pink));
+    position:sticky; top:0; z-index:10;
+    box-shadow:0 4px 20px rgba(216,27,96,.25);
+  }
+  h1{margin:0; font-size:1.7rem}
+  .wrap{max-width:900px; margin:0 auto; padding:18px}
+  .card{
+    background:#fff; border-radius:16px; padding:18px;
+    box-shadow:0 8px 28px rgba(0,0,0,.08);
+    margin:16px 0;
+  }
+  .center{text-align:center}
+  .btn{
+    background:var(--pink); color:#fff; border:none;
+    padding:10px 18px; border-radius:10px; cursor:pointer;
+    font-weight:700; letter-spacing:.2px;
+    box-shadow:0 8px 18px rgba(255,105,180,.25);
+    transition:transform .15s ease, filter .2s ease, background .2s ease;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn:disabled{opacity:.5; cursor:not-allowed; transform:none}
+  .btn.secondary{background:#7c4dff}
+  .btn.ghost{background:#fff; color:var(--deep); border:2px solid var(--deep)}
+  .grid{
+    display:grid; gap:14px;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    align-items:start;
+  }
+  .photo{
+    width:100%; aspect-ratio:4/5; object-fit:cover; border-radius:12px;
+    box-shadow:0 6px 22px rgba(0,0,0,.15);
+  }
+  .bubble{
+    display:inline-block; background:var(--bubble); padding:12px 14px;
+    border-radius:16px; box-shadow:0 8px 18px rgba(0,0,0,.08);
+    max-width:540px; line-height:1.45;
+  }
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  .hidden{display:none}
+  .pill{
+    display:inline-block; padding:7px 12px; border-radius:999px;
+    background:#fce4ec; color:#ad1457; font-weight:700; font-size:.9rem
+  }
+  .emoji{font-size:1.25rem; filter:drop-shadow(0 3px 5px rgba(0,0,0,.2))}
+
+  /* Snow only (black cat) */
+  .friends{display:flex; gap:20px; justify-content:center; align-items:center; margin:12px 0 2px}
+  .friend svg{width:140px; height:140px}
+  .say{animation:pop .5s ease both}
+  @keyframes pop{from{transform:scale(.92); opacity:0} to{transform:scale(1); opacity:1}}
+
+  /* Snow animations */
+  .snow-eye{transition:opacity .15s}
+  .blink{
+    animation:blink 4.5s infinite;
+    transform-origin:center;
+  }
+  @keyframes blink{
+    0%, 2%, 100%{opacity:1}
+    1%{opacity:0}
+  }
+  .tail{
+    transform-origin: 95px 80px;
+    animation: wag 2.3s ease-in-out infinite;
+  }
+  @keyframes wag{
+    0%,100%{ transform: rotate(12deg); }
+    50%{ transform: rotate(-6deg); }
+  }
+
+  /* Level headings */
+  .lvl{font-size:1.2rem; margin:0 0 12px}
+  .lvl .tag{background:#ffe6f2; color:#ad1457; padding:4px 10px; border-radius:999px; font-weight:700}
+
+  /* Multiple choice note items */
+  .choice{
+    background:#fff; border:2px solid #eee; border-radius:12px; padding:10px 12px; cursor:pointer;
+    transition:.15s ease; box-shadow:0 8px 20px rgba(0,0,0,.06)
+  }
+  .choice:hover{border-color:#ddd; transform:translateY(-1px)}
+  .choice.correct{border-color:var(--ok); background:#ebffef}
+  .choice.wrong{border-color:#ffb3b3; background:#fff0f0}
+
+  /* Drag & drop */
+  .drag-list{list-style:none; padding:0; margin:12px 0}
+  .drag-item{
+    background:#fff; border:2px dashed #e0e0e0; border-radius:12px; padding:12px;
+    margin:8px 0; cursor:grab
+  }
+  .drag-item.dragging{opacity:.6; border-color:#b39ddb}
+
+  /* Final screen sparkles/confetti */
+  .sparkles{
+    position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:1;
+  }
+  .sparkles span{
+    position:absolute; font-size:22px; animation:float 6s linear infinite; opacity:.85;
+    will-change:transform, opacity;
+  }
+  @keyframes float{
+    from{transform:translateY(110vh) rotate(0deg)}
+    to{transform:translateY(-10vh) rotate(360deg)}
+  }
+  .final-stage{position:relative; z-index:2}
+  .big{font-size:2rem; margin:.2rem 0}
+  .fade-in{animation:fade .8s ease both}
+  @keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)}}
+
+  /* Confetti */
+  #confettiLayer{
+    position:fixed; inset:0; pointer-events:none; z-index:3; overflow:hidden;
+  }
+  .confetti{
+    position:absolute; width:10px; height:18px; opacity:.9;
+    animation: fall linear forwards, spin linear forwards;
+    will-change: transform, opacity;
+  }
+  @keyframes fall{
+    to{ transform: translateY(110vh) rotate(0deg); opacity:1; }
+  }
+  @keyframes spin{
+    from{ transform: translateY(-10vh) rotate(0deg); }
+    to{ transform: translateY(110vh) rotate(720deg); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Snow presents: The Forever Game 💘</h1>
+</header>
+
+<div class="wrap">
+
+  <!-- INTRO: Snow only -->
+  <section id="intro" class="card center">
+    <div class="friends">
+      <div class="friend" aria-label="Snow (guide)">
+        <!-- Black cat with gold chain, blinking + tail wagging -->
+        <svg viewBox="0 0 140 140" role="img" aria-label="Snow (black cat)">
+          <!-- Body -->
+          <circle cx="70" cy="72" r="50" fill="#111"/>
+          <!-- Belly sheen -->
+          <ellipse cx="70" cy="92" rx="26" ry="18" fill="#222"/>
+          <!-- Ears -->
+          <polygon points="40,40 58,22 62,48" fill="#111"/>
+          <polygon points="100,40 82,22 78,48" fill="#111"/>
+          <!-- Tail -->
+          <path class="tail" d="M100,90 C118,88 126,92 128,102 C130,112 122,118 112,116"
+                fill="none" stroke="#111" stroke-width="10" stroke-linecap="round"/>
+          <!-- Eyes (white) -->
+          <circle cx="55" cy="65" r="9" fill="#fff"/>
+          <circle cx="85" cy="65" r="9" fill="#fff"/>
+          <!-- Pupils -->
+          <circle cx="55" cy="65" r="4" fill="#000"/>
+          <circle cx="85" cy="65" r="4" fill="#000"/>
+          <!-- Blink lids (black) -->
+          <ellipse class="snow-eye blink" cx="55" cy="65" rx="9" ry="9" fill="#111"/>
+          <ellipse class="snow-eye blink" cx="85" cy="65" rx="9" ry="9" fill="#111"/>
+          <!-- Nose -->
+          <polygon points="70,59 66,68 74,68" fill="#ffb3c1"/>
+          <!-- Mouth -->
+          <path d="M58,86 Q70,92 82,86" stroke="#ad1457" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- Gold chain -->
+          <path d="M42,84 C54,98 86,98 98,84" stroke="#e6b800" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <circle cx="70" cy="86" r="4" fill="#e6b800"/>
+        </svg>
+      </div>
+    </div>
+
+    <p class="say bubble fade-in"><strong>Snow:</strong> A <em>seeecrate</em> msg awaits u my lady ✨💌</p>
+    <p class="say bubble fade-in" style="animation-delay:.15s">I’ll explain the rules and keep score. Ready? 🐾</p>
+
+    <div style="margin-top:10px">
+      <button class="btn" id="startBtn">Start Level 1 ➜</button>
+    </div>
+  </section>
+
+  <!-- LEVEL 1 — Match the correct note -->
+  <section id="level1" class="card hidden">
+    <div class="row" style="justify-content:space-between; align-items:center;">
+      <h2 class="lvl"><span class="tag">Level 1</span> Pick the correct note for the photo</h2>
+      <span class="pill">3 questions</span>
+    </div>
+
+    <div class="grid" id="l1Area">
+      <div>
+        <img id="l1Photo" class="photo" src="" alt="Memory photo"/>
+      </div>
+      <div>
+        <div class="bubble" style="margin-bottom:10px">Pick the note that belongs to this photo:</div>
+        <div id="l1Choices" class="grid" style="grid-template-columns:1fr;"></div>
+        <div class="row" style="margin-top:10px; gap:10px">
+          <button class="btn" id="l1Next" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEVEL 2 — Which photo came next + its note -->
+  <section id="level2" class="card hidden">
+    <div class="row" style="justify-content:space-between; align-items:center;">
+      <h2 class="lvl"><span class="tag">Level 2</span> Which photo came after this — and what was its note?</h2>
+      <span class="pill">5 rounds</span>
+    </div>
+
+    <div class="grid" id="l2Area">
+      <div>
+        <div class="bubble" style="margin-bottom:8px">This was shown earlier in the slideshow:</div>
+        <img id="l2Current" class="photo" src="" alt="Current slideshow photo"/>
+      </div>
+      <div>
+        <div class="bubble" style="margin-bottom:8px">Which came <strong>next</strong>?</div>
+        <div id="l2Options" class="grid"></div>
+        <div class="bubble" style="margin:12px 0 6px">And the note on that next photo was…</div>
+        <div id="l2NoteOptions" class="grid" style="grid-template-columns:1fr;"></div>
+        <div class="row" style="margin-top:10px; gap:10px">
+          <button class="btn" id="l2Check" disabled>Lock Answer</button>
+          <button class="btn" id="l2Next" disabled>Next</button>
+        </div>
+        <div id="l2Feedback" class="bubble hidden" style="margin-top:8px"></div>
+      </div>
+    </div>
+
+    <div class="bubble" style="margin-top:12px">
+      <strong>Customize Level 2 photos/notes:</strong><br/>
+      Edit the <code>level2Seq</code> array in the JS (look for “// Level 2 — configure here”).<br/>
+      Use your files like <code>photos/p2_photo1.jpg</code>, and set the note string you want.
+    </div>
+  </section>
+
+  <!-- LEVEL 3 — Rearrange 3rd and 5th promise -->
+  <section id="level3" class="card hidden">
+    <h2 class="lvl"><span class="tag">Level 3</span> Put these promises in the correct order</h2>
+    <p class="bubble">Swap/rearrange the <strong>3rd</strong> and <strong>5th</strong> promise to match the original list. Drag to reorder 👆</p>
+    <ol id="dragList" class="drag-list"></ol>
+    <div class="row" style="gap:10px; margin-top:10px">
+      <button id="l3Check" class="btn">Check Order</button>
+    </div>
+    <div id="l3Feedback" class="bubble hidden" style="margin-top:10px"></div>
+  </section>
+
+  <!-- FINAL LOCK -->
+  <section id="finalLock" class="card hidden center">
+    <h2 class="lvl"><span class="tag">Final Lock</span> Bbygur😘😘😁</h2>
+    <p class="bubble">Unlock it and u will know the secrate msg 🔐</p>
+    <input id="passInput" placeholder="Enter password..." class="bubble" style="width:min(420px, 90%); border:2px solid #eee; font-size:1rem"/>
+    <div style="margin-top:10px">
+      <button id="unlockBtn" class="btn">Unlock</button>
+    </div>
+    <p id="passHint" class="bubble hidden" style="margin-top:10px; color:#c62828">Wrong pass 🙈</p>
+  </section>
+
+  <!-- SECRET MESSAGE SCREEN -->
+  <section id="secret" class="card hidden center final-stage">
+    <div class="sparkles" id="sparkleLayer"></div>
+    <div id="confettiLayer"></div>
+    <h2 class="big fade-in">You’ve earned your secret msg 💌</h2>
+    <div id="secretMsg" class="bubble" style="margin:12px auto; max-width:680px; font-size:1.1rem"></div>
+  </section>
+
+  <!-- NAV/PROGRESS -->
+  <section class="center" id="nav" style="margin:18px 0">
+    <button class="btn ghost" id="backBtn" disabled>◀ Back</button>
+    <button class="btn secondary" id="forwardBtn">Next ▶</button>
+  </section>
+</div>
+
+<script>
+/* =========================
+   DATA (EDIT HERE IF NEEDED)
+   ========================= */
+
+/* Level 1 — memory photos + notes (3 questions) */
+const level1Set = [
+  { src: "photos/photo1.jpg", note: "😊 ye photo pyari lagti mujhe itne sahi se ekdam khul ke has rahi hai aur tere saree tooo uffff 💖" },
+  { src: "photos/photo2.jpg", note: "😆 My heart went pounding so much poker face bas aa gaya force kiya gaya tha mujhe kada hone ke lea" },
+  { src: "photos/photo4.jpg", note: "🤭 hamari best photo no questions (abhi tak that is) asked... aur hame khud he chipa gaye the ek dusre se" },
+  { src: "photos/photo3.jpg", note: "😭 mujhe itne ajeeb tarike se haat rakna pada tha fat rahi the bass" },
+];
+
+/* Level 2 — configure here (slideshow sequence style) */
+const level2Seq = [
+  { src: "photos/p2_photo54.jpg", note: "hayee gol gol ekdam gal 🤤 sceen na kha jao me(kab milegi a tere gal mujhe)" },
+  { src: "photos/p2_photo55.jpg", note: "takluuu🤭🤭" },
+  { src: "photos/p2_photo56.jpg", note: "ye to trophy hai mere heheeh🤭🤭🤭🤭🤭🤭" },
+  { src: "photos/p2_photo57.jpg", note: "Thikkkkkkkccccccccc🤤🤤🤤🤤🤤🤤" },
+  { src: "photos/p2_photo58.jpg", note: "chalo me chala ase ase photo dekiye hai Inspector Harshiee pakad ke bahut pitee kar dengi mere🤭🤭 (especialy last ke 5)" },
+];
+
+/* Level 3 — promises (fix 3rd & 5th) */
+const promisesOriginalOrder = [
+  "💖 YOU PROMISE TO NEVER DOUBT YOURSELF IN ANY CASE",
+  "🌸 YOU PROMISE TO ALWAYS LOVE YOURSELF, BE YOUR FIRST PRIORITY (AND SHARE FOOD WITH ME 😗)",
+  "😤 YOU PROMISE NEVER TO DISAGREE WITH MY COMPLIMENTS (MY TASTE IS ELITE! IN U OFC MY DARLING 🥰)",
+  "🤪 YOU PROMISE TO KEEP UP WITH MY NONSENSE & RANDOM BULLSHIT",
+  "📜 YOU PROMISE TO MAKE A SHARED LIST OF ALL THE THINGS YOU LIKE OR WANT AND THEN HAVE IT SO THAT WE BOTH CAN VIEW IT WHENEVER I WANT!!"
+];
+const promisesStartOrder = [
+  promisesOriginalOrder[0],
+  promisesOriginalOrder[1],
+  promisesOriginalOrder[4], // swapped
+  promisesOriginalOrder[3],
+  promisesOriginalOrder[2], // swapped
+];
+
+/* Final lock password */
+const FINAL_PASS = "1608_2805_290924";
+
+/* =========================
+   STATE
+   ========================= */
+let stageIndex = 0; // 0:intro 1:L1 2:L2 3:L3 4:lock 5:secret
+const stages = ["intro","level1","level2","level3","finalLock","secret"];
+
+let l1Index = 0;
+let l1Score = 0;
+
+let l2Index = 0;       // points to the “current” (we ask next after it)
+let l2Locked = false;
+let l2PickedPhoto = null;
+let l2PickedNote = null;
+let l2Score = 0;
+
+/* =========================
+   HELPERS
+   ========================= */
+const $ = sel => document.querySelector(sel);
+const show = id => document.getElementById(id).classList.remove("hidden");
+const hide = id => document.getElementById(id).classList.add("hidden");
+
+function goToStage(i){
+  stages.forEach((s,idx)=> (idx===i?show:hide)(s));
+  stageIndex = i;
+
+  // nav buttons
+  $("#backBtn").disabled = (i===0);
+  $("#forwardBtn").disabled = (i>=stages.length-1 || i===5);
+  $("#forwardBtn").textContent = (i===stages.length-2) ? "Unlock ▶" : "Next ▶";
+}
+
+/* shuffle helper */
+function shuffle(arr){
+  return arr.map(a=>[Math.random(),a]).sort((a,b)=>a[0]-b[0]).map(a=>a[1]);
+}
+
+/* =========================
+   LEVEL 1 (3 questions)
+   ========================= */
+function setupLevel1(){
+  l1Index = 0; l1Score = 0;
+  renderL1();
+}
+function renderL1(){
+  const pool = level1Set.slice(0); // copy
+  const current = level1Set[l1Index % level1Set.length];
+  $("#l1Photo").src = current.src;
+
+  // choices: one correct + 2 random wrong
+  const others = shuffle(pool.filter(p => p.note !== current.note)).slice(0,2).map(p=>p.note);
+  const choices = shuffle([current.note, ...others]);
+
+  const box = $("#l1Choices");
+  box.innerHTML = "";
+  choices.forEach(txt=>{
+    const div = document.createElement("div");
+    div.className = "choice";
+    div.textContent = txt;
+    div.addEventListener("click", ()=>{
+      [...box.children].forEach(c=>c.classList.remove("correct","wrong"));
+      if(txt===current.note){ div.classList.add("correct"); $("#l1Next").disabled=false; l1Score++; }
+      else { div.classList.add("wrong"); $("#l1Next").disabled=false; }
+    });
+    box.appendChild(div);
+  });
+
+  $("#l1Next").disabled = true;
+}
+
+$("#l1Next").addEventListener("click", ()=>{
+  l1Index++;
+  if(l1Index>=3){
+    goToStage(2);
+    setupLevel2();
+  }else{
+    renderL1();
+  }
+});
+
+/* =========================
+   LEVEL 2 (sequence: next photo + note)
+   ========================= */
+function setupLevel2(){
+  l2Index = 0; l2Locked=false; l2PickedPhoto=null; l2PickedNote=null; l2Score=0;
+  renderL2();
+}
+function renderL2(){
+  const isLastPrompt = (l2Index >= level2Seq.length-1);
+  if(isLastPrompt){
+    goToStage(3);
+    setupLevel3();
+    return;
+  }
+
+  const current = level2Seq[l2Index];
+  const nextOne = level2Seq[l2Index+1];
+
+  $("#l2Current").src = current.src;
+
+  // photo options: include correct (nextOne) + 2 distractors
+  const rest = shuffle(level2Seq.filter(x=>x.src!==nextOne.src)).slice(0,2);
+  const photoChoices = shuffle([nextOne, ...rest]);
+
+  const optBox = $("#l2Options");
+  optBox.innerHTML = "";
+  photoChoices.forEach(item=>{
+    const btn = document.createElement("button");
+    btn.className = "btn ghost";
+    btn.style.display = "block";
+    btn.style.textAlign = "left";
+    btn.style.padding = "8px";
+    btn.innerHTML = `<img src="${item.src}" alt="option" style="width:100%; border-radius:10px; display:block; margin-bottom:6px; box-shadow:0 6px 16px rgba(0,0,0,.12)"><div>${item.src.split('/').pop()}</div>`;
+    btn.addEventListener("click", ()=>{
+      [...optBox.children].forEach(c=>c.style.outline="none");
+      btn.style.outline = "3px solid var(--deep)";
+      l2PickedPhoto = item;
+      updateL2Buttons();
+    });
+    optBox.appendChild(btn);
+  });
+
+  // note options (unique set)
+  const allNotes = shuffle(Array.from(new Set(level2Seq.map(x=>x.note))));
+  const noteBox = $("#l2NoteOptions");
+  noteBox.innerHTML = "";
+  allNotes.forEach(n=>{
+    const div = document.createElement("div");
+    div.className = "choice";
+    div.textContent = n || "(empty)";
+    div.addEventListener("click", ()=>{
+      [...noteBox.children].forEach(c=>c.classList.remove("correct","wrong"));
+      div.classList.add("correct");
+      l2PickedNote = n;
+      updateL2Buttons();
+    });
+    noteBox.appendChild(div);
+  });
+
+  $("#l2Feedback").classList.add("hidden");
+  $("#l2Feedback").textContent = "";
+  $("#l2Check").disabled = true;
+  $("#l2Next").disabled = true;
+  l2Locked = false; l2PickedPhoto=null; l2PickedNote=null;
+}
+function updateL2Buttons(){
+  $("#l2Check").disabled = !(l2PickedPhoto && (l2PickedNote!==null));
+}
+
+$("#l2Check").addEventListener("click", ()=>{
+  if(l2Locked) return;
+  const correctNext = level2Seq[l2Index+1];
+  const okPhoto = (l2PickedPhoto && l2PickedPhoto.src===correctNext.src);
+  const okNote  = (l2PickedNote===correctNext.note);
+
+  let msg = "";
+  if(okPhoto && okNote){ msg = "Perfect! Photo and note are correct 🥳"; l2Score++; }
+  else if(okPhoto){ msg = "Half win! Correct next photo, but note is off 😅"; }
+  else if(okNote){ msg = "Half win! Note is correct, but photo isn’t 😅"; }
+  else { msg = "Nope 😝 Both are off this round."; }
+
+  const fb = $("#l2Feedback");
+  fb.textContent = msg;
+  fb.classList.remove("hidden");
+
+  l2Locked = true;
+  $("#l2Next").disabled = false;
+});
+
+$("#l2Next").addEventListener("click", ()=>{
+  l2Index++;
+  renderL2();
+});
+
+/* =========================
+   LEVEL 3 (drag & drop)
+   ========================= */
+function setupLevel3(){
+  const list = $("#dragList");
+  list.innerHTML = "";
+  promisesStartOrder.forEach((text,i)=>{
+    const li = document.createElement("li");
+    li.className = "drag-item";
+    li.draggable = true;
+    li.dataset.index = i;
+    li.textContent = text;
+    addDragEvents(li);
+    list.appendChild(li);
+  });
+  $("#l3Feedback").classList.add("hidden");
+  $("#l3Feedback").textContent = "";
+}
+function addDragEvents(el){
+  el.addEventListener("dragstart", e=> {
+    el.classList.add("dragging");
+    e.dataTransfer.setData("text/plain", el.dataset.index);
+  });
+  el.addEventListener("dragend", ()=> el.classList.remove("dragging"));
+  el.addEventListener("dragover", e=>{
+    e.preventDefault();
+    const dragging = document.querySelector(".dragging");
+    const list = $("#dragList");
+    const siblings = [...list.querySelectorAll(".drag-item:not(.dragging)")];
+    const next = siblings.find(sib=>{
+      const rect = sib.getBoundingClientRect();
+      return e.clientY <= rect.top + rect.height/2;
+    });
+    list.insertBefore(dragging, next || null);
+  });
+}
+
+$("#l3Check").addEventListener("click", ()=>{
+  const items = [...document.querySelectorAll("#dragList .drag-item")].map(li=>li.textContent);
+  const correct = promisesOriginalOrder.every((txt, idx)=> items[idx] === txt);
+
+  const fb = $("#l3Feedback");
+  if(correct){
+    fb.textContent = "Perfect order! Snow approves 🐾✅";
+    fb.classList.remove("hidden");
+    setTimeout(()=> goToStage(4), 900);
+  }else{
+    fb.textContent = "Not quite! Fix the 3rd and 5th positions 😉";
+    fb.classList.remove("hidden");
+  }
+});
+
+/* =========================
+   FINAL LOCK + SECRET MSG
+   ========================= */
+$("#unlockBtn").addEventListener("click", ()=>{
+  const val = $("#passInput").value.trim();
+  if(val === FINAL_PASS){
+    goToStage(5);
+    startSecretShow();
+  }else{
+    $("#passHint").classList.remove("hidden");
+  }
+});
+
+/* Sparkles background */
+function addSparkles(){
+  const layer = $("#sparkleLayer");
+  layer.innerHTML = "";
+  const emojis = ["✨","🎉","💖","🎊","💫","🌟","🩷","💐","🥳"];
+  for(let i=0;i<40;i++){
+    const s = document.createElement("span");
+    s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    s.style.left = Math.random()*100 + "vw";
+    s.style.animationDuration = (4 + Math.random()*5) + "s";
+    s.style.animationDelay = (Math.random()*3) + "s";
+    layer.appendChild(s);
+  }
+}
+
+/* Confetti generator */
+function launchConfetti(durationMs=6000, count=180){
+  const layer = $("#confettiLayer");
+  layer.innerHTML = "";
+  const colors = ["#ff69b4","#7c4dff","#ffd166","#06d6a0","#118ab2","#ef476f","#ffd1e8","#b2f7ef"];
+  for(let i=0;i<count;i++){
+    const piece = document.createElement("div");
+    piece.className = "confetti";
+    const size = 6 + Math.random()*10;
+    piece.style.width = (size*0.6) + "px";
+    piece.style.height = size + "px";
+    piece.style.left = Math.random()*100 + "vw";
+    piece.style.top = (-10 - Math.random()*40) + "vh";
+    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+    const fallTime = 3 + Math.random()*3;
+    piece.style.animationDuration = fallTime + "s, " + (2 + Math.random()*3) + "s";
+    piece.style.animationDelay = (Math.random()*0.5) + "s, 0s";
+    piece.style.transform = `translateY(-10vh) rotate(${Math.random()*360}deg)`;
+    layer.appendChild(piece);
+  }
+  setTimeout(()=> layer.innerHTML="", durationMs);
+}
+
+/* Timed secret messages + effects */
+function startSecretShow(){
+  addSparkles();
+  launchConfetti(7000, 220);             // initial burst
+  setTimeout(()=>launchConfetti(5000, 160), 2000); // second burst
+
+  const box = $("#secretMsg");
+  const msg1 = `I win bbygurl 🫶 I love u more than anything in this world — and that is THE FACT.`;
+  const msg2h = `Ohhh another secret msg 😱😱😱 wow 🤭🤭🤭🤭`;
+  const msg2  = `kuch ajeeb lik deta fir gussa kartne lagti hai islea hata deya mene msg 😒😒 gandii`;
+  const msg3  = `THAT JUICY ASS IS MINE FOREVER N U HAVE NO CHOISE 🤞🤤🤤🤤 (FUKING CRAVING)`;
+  const tiny  = `Bahut jane ka shok tha na 😒😒`;
+
+  box.innerHTML = `<div class="fade-in" style="font-size:1.25rem">${msg1}</div>`;
+
+  setTimeout(()=>{
+    box.innerHTML = `
+      <div class="fade-in">
+        <div class="big">${msg2h}</div>
+        <div style="margin-top:6px; font-size:1.1rem">${msg2}</div>
+      </div>`;
+    launchConfetti(6000, 180);
+  }, 45_000);
+
+  setTimeout(()=>{
+    box.innerHTML = `
+      <div class="fade-in" style="font-size:1.35rem">${msg3}</div>
+      <div style="margin-top:6px; opacity:.8; font-size:.95rem">${tiny}</div>`;
+    launchConfetti(6500, 200);
+  }, 45_000 + 90_000);
+}
+
+/* =========================
+   NAV / PROGRESSION
+   ========================= */
+$("#startBtn").addEventListener("click", ()=>{
+  goToStage(1);
+  setupLevel1();
+});
+
+$("#forwardBtn").addEventListener("click", ()=>{
+  if(stageIndex===0){ goToStage(1); setupLevel1(); }
+  else if(stageIndex===1){ goToStage(2); setupLevel2(); }
+  else if(stageIndex===2){ goToStage(3); setupLevel3(); }
+  else if(stageIndex===3){ goToStage(4); }
+});
+
+$("#backBtn").addEventListener("click", ()=>{
+  if(stageIndex>0){
+    goToStage(stageIndex-1);
+  }
+});
+
+/* boot */
+goToStage(0);
+</script>
+</body>
+</html>

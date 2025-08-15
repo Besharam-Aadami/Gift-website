@@ -67,6 +67,11 @@
         opacity: 0;
       }
     }
+
+    /* Hidden preloader container */
+    #preload-container {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -78,12 +83,15 @@
 
   <button onclick="location.href='page2_password.html'">Let's Explore</button>
 
+  <!-- Preload resources -->
+  <div id="preload-container"></div>
+
   <script>
     function goNext() {
       window.location.href = "page2.html";
     }
 
-    // floating emojis
+    // Floating emojis
     const emojis = ["🎉", "💖", "✨", "🥳", "💞", "💕", "🎈", "💝"];
     for (let i = 0; i < 40; i++) {
       const span = document.createElement("span");
@@ -93,6 +101,36 @@
       span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
       document.body.appendChild(span);
     }
+
+    // ----------- PRELOAD IMAGES & SONGS ----------- //
+    const photos = [
+      "photos/p2_photo1.jpg","photos/p2_photo2.jpg","photos/p2_photo3.jpg",
+      "photos/p2_photo48.jpg","photos/p2_photo49.jpg","photos/p2_photo50.jpg",
+      "photos/p2_photo51.jpg","photos/photo1.jpg","photos/photo2.jpg",
+      "photos/photo3.jpg","photos/photo4.jpg"
+    ];
+
+    const songs = [
+      "songs/p2_song.mp3","songs/song1.mp3","songs/song2.mp3",
+      "songs/song3.mp3","songs/song4.mp3"
+    ];
+
+    const preloadContainer = document.getElementById("preload-container");
+
+    // Preload images
+    photos.forEach(src => {
+      const img = new Image();
+      img.src = src;
+      preloadContainer.appendChild(img);
+    });
+
+    // Preload songs (by creating hidden audio elements)
+    songs.forEach(src => {
+      const audio = document.createElement("audio");
+      audio.src = src;
+      audio.preload = "auto";
+      preloadContainer.appendChild(audio);
+    });
   </script>
 </body>
 </html>
